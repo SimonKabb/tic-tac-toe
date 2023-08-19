@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const gameBoard = document.getElementById('game-board');
+    let currentPlayer = 'X';
 
     // Создание игровой сетки
     for (let i = 0; i < 3; i++) {
@@ -15,17 +16,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleClick(event) {
         const cell = event.target;
-        const row = cell.dataset.row;
-        const col = cell.dataset.col;
 
-        // Отправка данных на сервер (используйте AJAX или Fetch)
-        // Пример:
-        fetch(`/make_move/?row=${row}&col=${col}`)
+        if (!cell.textContent) {
+            cell.textContent = currentPlayer;
+            currentPlayer = (currentPlayer === 'X') ? 'O' : 'X';
+
+            const row = cell.dataset.row;
+            const col = cell.dataset.col;
+
+            fetch('make_move/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrf_token,
+    },
+    body: JSON.stringify({
+        row: row,
+        col: col,
+        symbol: cell.textContent,
+        game_id: 1,
+    }),
+})
             .then(response => response.json())
             .then(data => {
-                // Обновление игрового поля с учетом ответа от сервера
-                // Например, обновление содержимого ячейки на "X" или "O"
+                // Обработка ответа от сервера, если необходимо
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
     }
 });
+
+
+

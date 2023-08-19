@@ -20,3 +20,4 @@ class Move(models.Model):
     player = models.ForeignKey(User, on_delete=models.CASCADE)
     row = models.IntegerField()
     col = models.IntegerField()
+    symbol = models.CharField(max_length=1)
