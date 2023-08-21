@@ -23,18 +23,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const row = cell.dataset.row;
             const col = cell.dataset.col;
-
-            fetch('make_move/', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrf_token,
-    },
-    body: JSON.stringify({
-        row: row,
-        col: col,
-        symbol: cell.textContent,
-        game_id: 1,
+            const gameKeyElement = document.getElementById('game-id');
+            const gameKey = gameKeyElement.textContent;
+    fetch('/make_move/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrf_token,
+        },
+        body: JSON.stringify({
+            row: row,
+            col: col,
+            symbol: cell.textContent,
+            game_key: gameKey,
     }),
 })
             .then(response => response.json())

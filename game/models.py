@@ -10,6 +10,7 @@ class Game(models.Model):
     """
     created_ad = models.DateTimeField(auto_now_add=True)
     is_activate = models.BooleanField(default=True)
+    game_key = models.CharField(max_length=8)
 
 
 class Move(models.Model):

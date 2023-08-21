@@ -1,13 +1,35 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Game, Move
+import random
+import string
+
+
+def generate_unique_key():
+    while True:
+        game_key = ''.join(random.choices(string.digits, k=8))
+        if not Game.objects.filter(game_key=game_key).exists():
+            return game_key
 
 
 def index(request):
-    template = 'game/game_board.html'
+    template = 'game/new_game.html'
     return render(request, template)
+
+
+def new_game(request):
+    game_key = generate_unique_key()
+    new_game = Game.objects.create(game_key=game_key)
+    new_game.save()
+    return redirect('game_board', game_key=game_key)
+
+
+def game_board(request, game_key):
+    template = 'game/game_board.html'
+    context = {'game_key': game_key}
+    return render(request, template, context)
 
 
 def get_data(request):
@@ -20,22 +42,26 @@ def get_data(request):
 
 @csrf_exempt
 def make_move(request):
+    print('функция рабоатет')
     if request.method == 'POST':
         data = json.loads(request.body)
         row = data['row']
         col = data['col']
         symbol = data['symbol']
-        # Предположим, что вы передаете идентификатор игры
-        game_id = data['game_id']
+        game_key = data['game_key']
         player = request.user
-
+        print(row, col, symbol)
         try:
-            # Предположим, что у вас есть модель Game
-            game = Game.objects.get(id=game_id)
+            game = Game.objects.get(game_key=game_key)
+            print(111)
         except Game.DoesNotExist:
             response_data = {'message': 'Игра не найдена'}
             return JsonResponse(response_data, status=400)
-
+        existing_move = Move.objects.filter(
+            game=game, row=row, col=col).first()
+        if existing_move:
+            response_data = {'message': 'Такой ход уже был'}
+            return JsonResponse(response_data, status=400)
         move = Move(game=game, row=row, col=col, symbol=symbol, player=player)
         move.save()
 

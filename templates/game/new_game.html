@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики</title>
+</head>
+<body>
+    <h1>Добро пожаловать!</h1>
+    <p>Имя пользователя: <span id="username">{{ request.user.username }}</span></p>
+
+    <form id="join-game-form">
+        <label for="game-key-input">Введите уникальный идентификатор игры:</label>
+        <input type="text" id="game-key-input" required>
+        <button type="submit" id="join-game-btn">Подключиться к игре</button>
+    </form>
+
+    <button id="new-game-btn" data-game-key="{{ game_key }}">Начать новую игру</button>
+
+
+    <script>
+        const csrf_token = '{{ csrf_token|escapejs }}';
+
+        document.getElementById('join-game-form').addEventListener('submit', event => {
+            event.preventDefault();
+            const gameKey = document.getElementById('game-key-input').value;
+            fetch('/join_game/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf_token,
+                },
+                body: JSON.stringify({
+                    username: '{{ request.user.username|escapejs }}',
+                    game_key: gameKey,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('game-id').textContent = data.game_id;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('new-game-btn').addEventListener('click', () => {
+    window.location.href = '/new_game/';  // Переход на страницу /new_game/
+});
+    </script>
+</body>
+</html>
