@@ -42,7 +42,6 @@ def get_data(request):
 
 @csrf_exempt
 def make_move(request):
-    print('функция рабоатет')
     if request.method == 'POST':
         data = json.loads(request.body)
         row = data['row']
@@ -50,10 +49,9 @@ def make_move(request):
         symbol = data['symbol']
         game_key = data['game_key']
         player = request.user
-        print(row, col, symbol)
         try:
             game = Game.objects.get(game_key=game_key)
-            print(111)
+            print('Игра найдена')
         except Game.DoesNotExist:
             response_data = {'message': 'Игра не найдена'}
             return JsonResponse(response_data, status=400)
@@ -61,6 +59,7 @@ def make_move(request):
             game=game, row=row, col=col).first()
         if existing_move:
             response_data = {'message': 'Такой ход уже был'}
+            print('Такой ход уже был')
             return JsonResponse(response_data, status=400)
         move = Move(game=game, row=row, col=col, symbol=symbol, player=player)
         move.save()
