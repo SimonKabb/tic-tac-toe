@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .models import Game, Move
@@ -17,6 +17,21 @@ def generate_unique_key():
 def index(request):
     template = 'game/new_game.html'
     return render(request, template)
+
+
+def get_moves(request):
+    if request.method == 'GET':
+        game_key = request.GET.get('game_key')
+        if game_key is not None:
+            game = get_object_or_404(Game, game_key=game_key)
+            moves = Move.objects.filter(
+                game=game).values('row', 'col', 'symbol')
+            print(moves, game_key)
+            return JsonResponse({'moves': list(moves)})
+        else:
+            return JsonResponse({'error': 'Invalid game_id'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 def new_game(request):
